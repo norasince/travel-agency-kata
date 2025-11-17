@@ -54,13 +54,19 @@ public class CustomersInDatabaseRepository implements CustomersRepository {
 
     @Override
     public Optional<Customer> getCustomerById(String id) {
-        Optional<Customer> opt = Optional.of(createCustomerByEntity(customerEntity);
-        CustomerEntity customerEntity = customersJPARepository.findById(id);
-        return customerEntity == null ? Optional.empty() : Optional.of(createCustomerByEntity(customerEntity));
+
+        Optional<CustomerEntity> customerEntity = customersJPARepository.findById(id);
+
+        return customerEntity.map(this::createCustomerByEntity);
+
     }
 
     @Override
     public Optional<Customer> getCustomerByPassport(String id) {
+
+        Optional <CustomerEntity> customerEntity = Optional.of(customersJPARepository.getByPassportNumber(id));
+
+        return customerEntity.map(this::createCustomerByEntity);
 
 
     }
