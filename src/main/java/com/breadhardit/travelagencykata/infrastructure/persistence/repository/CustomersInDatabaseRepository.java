@@ -64,7 +64,7 @@ public class CustomersInDatabaseRepository implements CustomersRepository {
     @Override
     public Optional<Customer> getCustomerByPassport(String id) {
 
-        Optional <CustomerEntity> customerEntity = Optional.of(customersJPARepository.getByPassportNumber(id));
+        Optional <CustomerEntity> customerEntity = Optional.ofNullable(customersJPARepository.getByPassportNumber(id));
 
         return customerEntity.map(this::createCustomerByEntity);
 

@@ -1,6 +1,8 @@
 package com.breadhardit.travelagencykata.infrastructure.rest;
 
 import com.breadhardit.travelagencykata.application.command.command.CreateCustomerCommand;
+import com.breadhardit.travelagencykata.application.command.command.CreateCustomerHandler;
+import com.breadhardit.travelagencykata.application.command.query.GetCustomerHandler;
 import com.breadhardit.travelagencykata.application.command.query.GetCustomerQuery;
 import com.breadhardit.travelagencykata.application.port.CustomersRepository;
 import com.breadhardit.travelagencykata.domain.Customer;
@@ -21,7 +23,8 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class CustomersController {
 
-    final CustomersRepository customersRepository;
+    private final GetCustomerHandler getCustomerHandler;
+    private final CreateCustomerHandler createCustomerHandler;
 
     @PutMapping("/customers")
     @Transactional
@@ -32,9 +35,10 @@ public class CustomersController {
                 .surnames(customer.getSurnames())
                 .birthDate(customer.getBirthDate())
                 .passportNumber(customer.getPassportNumber())
-                .customersRepository(customersRepository)
                 .build();
-        String id = command.handle();
+
+        String id = createCustomerHandler.handle(command);
+
         return ResponseEntity.created(
                 ServletUriComponentsBuilder.fromCurrentRequest().path("/{customer-id}")
                         .buildAndExpand(id)
@@ -44,10 +48,13 @@ public class CustomersController {
     @GetMapping("/customers/{customer-id}")
     public ResponseEntity getCustomer(@PathVariable String customerId) {
         log.info("Getting the customer {}", customerId);
-        Optional<Customer> customer = GetCustomerQuery.builder()
-                .customersRepository(customersRepository)
+
+        GetCustomerQuery query = GetCustomerQuery.builder()
                 .id(customerId)
-                .build().handle();
+                .build();
+
+        Optional<Customer> customer = getCustomerHandler.handle(query);
+
         return customer.isEmpty() ? ResponseEntity.noContent().build()
                 : ResponseEntity.ok(GetCustomerDTO.builder()
                 .name(customer.get().getName())
@@ -59,18 +66,21 @@ public class CustomersController {
     @GetMapping("/customers")
     public ResponseEntity getCustomers(@RequestParam(name = "passport-number") String passportNumber) {
         log.info("Getting the customer with the passport {}",passportNumber);
-        Optional<Customer> customer = GetCustomerQuery.builder()
-                .customersRepository(customersRepository)
+
+        GetCustomerQuery query = GetCustomerQuery.builder()
                 .passport(passportNumber)
-                .build().handle();
+                .build();
+
+        Optional<Customer> customer = getCustomerHandler.handle(query);
+
         return customer.isEmpty() ? ResponseEntity.noContent().build() :
                 ResponseEntity.ok(
-                  List.of(GetCustomerDTO.builder()
-                          .name(customer.get().getName())
-                          .surnames(customer.get().getSurnames())
-                          .birthDate(customer.get().getBirthDate())
-                          .passportNumber(customer.get().getPassportNumber())
-                          .build())
+                        List.of(GetCustomerDTO.builder()
+                                .name(customer.get().getName())
+                                .surnames(customer.get().getSurnames())
+                                .birthDate(customer.get().getBirthDate())
+                                .passportNumber(customer.get().getPassportNumber())
+                                .build())
                 );
     }
 

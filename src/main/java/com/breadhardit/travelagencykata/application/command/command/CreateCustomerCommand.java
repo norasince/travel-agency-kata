@@ -17,18 +17,7 @@ public class CreateCustomerCommand {
     String surnames;
     LocalDate birthDate;
     String passportNumber;
-    CustomersRepository customersRepository;
-    @SneakyThrows
-    public String handle() {
-        Customer customer = Customer.builder()
-                .id(id)
-                .name(name)
-                .surnames(surnames)
-                .birthDate(birthDate)
-                .passportNumber(passportNumber)
-                .build();
-        customersRepository.saveCustomer(customer);
-        return customer.getId();
-    }
+
+
 
 }
